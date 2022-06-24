@@ -1,14 +1,18 @@
-from pipeline.classification_pipeline import fit_classifier
-from pipeline.merge_classifier_reports import merge_reports
+from pipeline.cross_validation import fit_classifier
+from pipeline.merge_cv_reports import merge_reports
+from pipeline.classify_test_dataset import classify_test
 
 classifiers = ['svm', 'knn', 'dt', 'rf']
 for classifier in classifiers:
     print('fitting %s' % (classifier))
     fit_classifier(classifier)
-    print('results saved on ./results/classifier folder')
+    print('results saved in ./results/classifier folder')
 
 print('')
 merge_reports()
 print('cv classifier reports merged in ./results/cv')
 
+print('')
+classify_test()
+print('test classification results saved in ./results/cv')
 
