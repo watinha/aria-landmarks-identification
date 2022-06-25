@@ -3,6 +3,8 @@ import os, pandas as pd
 from PIL import Image, ImageDraw
 from urllib.parse import urlparse
 
+error_webpages = ['114-437', '156-142', '176-120', '211-44', '389-317', '4-95', '408-178', '415-182', '67-169', '73-229', '81-273']
+
 def generate_reports ():
     reports = [ report for report in os.listdir('./results/clusters/') if report.endswith('.csv') ]
 
@@ -12,9 +14,11 @@ def generate_reports ():
         nrows, _ = df.shape
         domain = df['url'].tolist()[0]
         target_screenshot = df['screenshot'].tolist()[0]
+        url_hash = target_screenshot.split('/').pop()[:-4]
+        target_screenshot = './data/screenshots/%s.png' % (url_hash)
 
-        if '.json_.png' in target_screenshot or '.png_' in target_screenshot:
-            print('no CSS website')
+        if '.json_.png' in target_screenshot or '.png_' in target_screenshot or url_hash in error_webpages:
+            print('Webpage with error: 404, forbidden, impeditive modal, captcha, no CSS website')
             pass
         else:
             print('reporting %s -> %s -> %s' % (report, domain, target_screenshot))
