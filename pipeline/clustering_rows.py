@@ -4,11 +4,11 @@ CHUNKSIZE = 50000
 
 landmarks = ['banner', 'complementary', 'contentinfo', 'form',
              'navigation', 'search', 'region', 'main']
-banner = None
-contentinfo = None
-complementary = None
-
 def cluster_rows ():
+    banner = None
+    contentinfo = None
+    complementary = None
+
     for landmark in landmarks:
         nrows = CHUNKSIZE
         with pd.read_csv('./results/test/classified-%s.csv' % (landmark), iterator=True) as parser:

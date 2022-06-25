@@ -1,4 +1,4 @@
-import pandas as pd, pickle, sys, os
+import pandas as pd, pickle, os
 
 model = 'rf-True-False.sav'
 THRESHOLD = 0.5
@@ -7,8 +7,8 @@ def classify_test ():
 
     partial_files = [ path for path in os.listdir('./data/test/') if path.endswith('-test.csv') ]
 
-    extractor = pickle.load(open('./4-output-classification-report/extractor-%s' % (model), 'rb'))
-    pipeline = pickle.load(open('./4-output-classification-report/pipeline-%s' % (model), 'rb'))
+    extractor = pickle.load(open('./results/classifier/extractor-%s' % (model), 'rb'))
+    pipeline = pickle.load(open('./results/classifier/pipeline-%s' % (model), 'rb'))
 
     landmarks = ['banner', 'main', 'contentinfo', 'form', 'navigation', 'search', 'region', 'complementary']
 
@@ -51,5 +51,3 @@ def classify_test ():
                 df.to_csv(filename, mode='a', header=False)
 
         del classified
-
-    sys.exit(0)
