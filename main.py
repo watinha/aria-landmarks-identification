@@ -2,6 +2,7 @@ from pipeline.cross_validation import fit_classifier
 from pipeline.merge_cv_reports import merge_reports
 from pipeline.classify_test_dataset import classify_test
 from pipeline.clustering_rows import cluster_rows
+from pipeline.image_report import generate_reports
 
 classifiers = ['svm', 'knn', 'dt', 'rf']
 for classifier in classifiers:
@@ -20,4 +21,8 @@ print('test classification results saved in ./results/cv')
 print('')
 cluster_rows()
 print('clustering results saved in ./results/clusters')
+
+print('')
+generate_reports()
+print('image reports saved in ./results/image-reports')
 
