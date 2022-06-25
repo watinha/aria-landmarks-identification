@@ -15,14 +15,17 @@ merge_reports()
 print('cv classifier reports merged in ./results/cv')
 
 print('')
+print('predicting test dataset...')
 classify_test()
 print('test classification results saved in ./results/cv')
 
 print('')
+print('clustering rows according to classification and position/size...')
 cluster_rows()
 print('clustering results saved in ./results/clusters')
 
 print('')
+print('generating image reports...')
 generate_reports()
 print('image reports saved in ./results/image-reports')
 
