@@ -33,6 +33,8 @@ def classify_test ():
             else:
                 classified[landmark] = classified[landmark].append(dataset.loc[dataset['class'] == landmark, :], ignore_index=True)
 
+        dataset.to_csv('./results/test/%s' % (path))
+
         del dataset
 
         for landmark in landmarks:
