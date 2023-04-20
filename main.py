@@ -1,8 +1,9 @@
-from pipeline.cross_validation import fit_classifier
-from pipeline.merge_cv_reports import merge_reports
 from pipeline.classify_test_dataset import classify_test
 from pipeline.clustering_rows import cluster_rows
+from pipeline.cross_validation import fit_classifier
 from pipeline.image_report import generate_reports
+from pipeline.merge_cv_reports import merge_reports
+from pipeline.regions_search import search_regions
 
 classifiers = ['svm', 'knn', 'dt', 'rf']
 for classifier in classifiers:
@@ -23,6 +24,12 @@ print('')
 print('clustering rows according to classification and position/size...')
 cluster_rows()
 print('clustering results saved in ./results/clusters')
+
+print('')
+print('searching for regions using xpath...')
+search_regions()
+print('new regions saved in ./results/clusters')
+
 
 print('')
 print('generating image reports...')
