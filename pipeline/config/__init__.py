@@ -66,6 +66,14 @@ def get_pipeline (classifier_name, ncol):
             'classifier__leaf_size': [10, 30, 50],
             'classifier__p': [1, 2]
         }
+    elif (classifier_name == 'gb'):
+        classifier = emsemble.GradientBoostingClassifier()
+        params = {
+            'classifier__n_estimators': [5, 10, 50],
+            'classifier__max_depth': [5, 10, 15, None],
+            'classifier__min_samples_split': [2, 10],
+            'classifier__learning_rate': [0.01,0.1,1]
+        }
     else:
         classifier = svm.LinearSVC(random_state=seed, fit_intercept=False)
         params = {
