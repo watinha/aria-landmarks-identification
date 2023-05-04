@@ -1,8 +1,9 @@
 import pandas as pd, numpy as np, sys, pickle
 
+from sklearn import metrics
 from sklearn.model_selection import GroupShuffleSplit
 
-from pipeline.config import get_pipeline, EnhancingFeatures
+from pipeline.config import get_pipeline
 
 df = pd.read_csv('./data/similarity-dataset.csv')
 numeric_columns = df.select_dtypes(include=np.number).columns.tolist()
@@ -47,7 +48,7 @@ for classifier in classifiers:
   print()
 
   pipeline = get_pipeline(classifier, ncol)
-  pipeline.fit(X_train, y_train, groups=groups)
+  pipeline.fit(X, y, groups=groups)
 
   with open('./results/classifier/pipeline-similarity-%s.sav' % (classifier), 'wb') as f:
     pickle.dump(pipeline, f)
