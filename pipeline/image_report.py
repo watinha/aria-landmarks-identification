@@ -12,6 +12,7 @@ def generate_reports ():
         landmark, url_index, pag, _ = (report[0:-4]).split('-')
 
         xpath = report.endswith('.xpath.csv')
+        similar = report.endswith('.similar.csv')
 
         df = pd.read_csv('./results/clusters/%s' % (report))
         nrows, _ = df.shape
@@ -49,8 +50,14 @@ def generate_reports ():
                         os.mkdir('./results/image-reports/%s' % (url_hash))
                         baseline.save('./results/image-reports/%s/baseline.png' % (url_hash))
                     if drawed_images:
-                        xpath_str = 'xpath' if xpath else 'baseline'
-                        img.save('./results/image-reports/%s/%s-%s-%s-%s-report.png' % (url_hash, landmark, url_index, pag, xpath_str))
-                        df.loc[:, ['url', 'screenshot', 'xpath']].to_csv('./results/image-reports/%s/%s-%s-%s-%s.csv' % (url_hash, landmark, url_index, pag, xpath_str))
+                        mode = 'baseline'
+
+                        if xpath:
+                          mode = 'xpath'
+                        if similar:
+                          mode = 'similar'
+
+                        img.save('./results/image-reports/%s/%s-%s-%s-%s-report.png' % (url_hash, landmark, url_index, pag, mode))
+                        df.loc[:, ['url', 'screenshot', 'xpath']].to_csv('./results/image-reports/%s/%s-%s-%s-%s.csv' % (url_hash, landmark, url_index, pag, mode))
             except:
                 print('no screenshot image -> means website with no CSS as well')

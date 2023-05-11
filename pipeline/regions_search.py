@@ -1,9 +1,18 @@
-import editdistance, os, pandas as pd
+import pickle, editdistance, os, pandas as pd, numpy as np
+
+from sklearn import metrics
+from sklearn.model_selection import GroupShuffleSplit
+
+from pipeline.config import get_pipeline
 
 XPATH_DISTANCE = 1
+THRESHOLD = 0.5
+LANDMARKS = ['banner', 'complementary', 'contentinfo', 'form', 'main', 'navigation', 'region', 'search']
 
 def search_regions ():
-  cluster_reports = [ report for report in os.listdir('./results/clusters/') if report.endswith('.csv') and report.startswith('region-') and not report.endswith('.xpath.csv') ]
+  pipeline = pickle.load(open('./results/classifier/pipeline-similarity-rf.sav', 'rb'))
+
+  cluster_reports = [ report for report in os.listdir('./results/clusters/') if report.endswith('.csv') and report.startswith('region-') and not report.endswith('.xpath.csv') and not report.endswith('.similar.csv')]
   test_reports = [ report for report in os.listdir('./results/test/') if report.endswith('-test.csv') ]
 
   test_map = {}
@@ -29,24 +38,48 @@ def search_regions ():
     cluster_xpaths = df['xpath'].tolist()
     test_xpaths = test_df['xpath'].tolist()
 
-    similar_xpaths = get_similar_xpaths(cluster_xpaths, test_xpaths)
-    similar_df = test_df.iloc[similar_xpaths]
+    (base_ind, target_ind) = get_similar_xpaths(cluster_xpaths, test_xpaths)
+    similar_df = test_df.iloc[target_ind]
 
-    new = pd.concat([df, similar_df])
+    xpath_df = pd.concat([df, similar_df])
     new_name = filename.replace('.csv', '.xpath.csv')
-    new.to_csv('./results/clusters/%s' % (new_name))
+    xpath_df.to_csv('./results/clusters/%s' % (new_name))
 
-    print('%s - %d -> %d' % (url, df.shape[0], new.shape[0]))
+    print('%s - xpath - %d -> %d' % (url, df.shape[0], xpath_df.shape[0]))
+
+    classified_df = pd.DataFrame()
+    for i, ind in enumerate(target_ind):
+      base = df.iloc[[base_ind[i]]]
+      target = test_df.iloc[[ind]]
+      target.index = base.index
+      base.columns = [('base_%s' % (c)) for c in base.columns]
+      target.columns = [('target_%s' % (c)) for c in target.columns]
+      similarity_df = pd.concat([base, target], axis=1)
+
+      X = features_from_similarity_df(similarity_df)
+      y = pipeline.predict(X)
+
+      if y > THRESHOLD:
+        classified_df = pd.concat([classified_df, test_df.iloc[[ind]]])
+
+    classified_df = pd.concat([df, classified_df])
+    new_name = filename.replace('.csv', '.xpath.similar.csv')
+    classified_df.to_csv('./results/clusters/%s' % (new_name))
+
+    print('%s - classified - %d -> %d' % (url, xpath_df.shape[0], classified_df.shape[0]))
+    print('')
 
     del df
     del test_df
-    del new
+    del xpath_df
+    del classified_df
 
 
 def get_similar_xpaths (cluster, test):
-  result = []
+  result_base = []
+  result_target = []
 
-  for xpath1 in cluster:
+  for j, xpath1 in enumerate(cluster):
     for i, xpath2 in enumerate(test):
       arr1 = xpath1.split('/')
       arr2 = xpath2.split('/')
@@ -55,9 +88,10 @@ def get_similar_xpaths (cluster, test):
       while len(arr2) < len(arr1): arr2.append('')
 
       if editdistance.eval(arr1, arr2) == XPATH_DISTANCE:
-        result.append(i)
+        result_base.append(j)
+        result_target.append(i)
 
-  return result
+  return (result_base, result_target)
 
 
 def similar(baseline, xpaths):
@@ -132,3 +166,59 @@ def generate_similarity_dataset ():
       result = pd.concat([result, different_rows])
 
   result.to_csv('./data/similarity-dataset.csv')
+
+
+def features_from_similarity_df (df):
+  numeric_columns = df.select_dtypes(include=np.number).columns.tolist()
+  filtered_columns = [c for c in numeric_columns
+                        if c.find('_Unnamed') == -1 and c != 'similar' and 'className' not in c]
+  base_landmarks = ['base_%s' % (landmark) for landmark in LANDMARKS]
+  base_columns = [c for c in filtered_columns if c.startswith('base_') and c not in base_landmarks]
+  target_landmarks = ['target_%s' % (landmark) for landmark in LANDMARKS]
+  target_columns = [c for c in filtered_columns if c.startswith('target_') and c not in target_landmarks]
+
+  X = np.abs(df[base_columns].to_numpy() - df[target_columns].to_numpy())
+  return X
+
+
+def fit_similarity_classifier (classifiers):
+  df = pd.read_csv('./data/similarity-dataset.csv')
+  X = features_from_similarity_df(df)
+  y = df['similar'].to_numpy()
+  groups = df['base_url'].to_numpy()
+
+  results = {}
+  for classifier in classifiers:
+    results[classifier] = { 'y_true': [], 'y_pred': [] }
+
+  _, ncol = X.shape
+
+  folds = GroupShuffleSplit(n_splits=10, random_state=42)
+  for train, test in folds.split(X, y, groups):
+    X_train, y_train = X[train, :], y[train]
+    X_test, y_test = X[test, :], y[test]
+    group_train = groups[train]
+
+    for classifier in classifiers:
+      pipeline = get_pipeline(classifier, ncol)
+      pipeline.fit(X_train, y_train, groups=group_train)
+
+      results[classifier]['y_pred'].extend(pipeline.predict(X_test))
+      results[classifier]['y_true'].extend(y_test)
+
+
+  for classifier in classifiers:
+    y_pred = results[classifier]['y_pred']
+    y_true = results[classifier]['y_true']
+    print('==========================')
+    print('-                        -')
+    print('-   %s    -' % (classifier))
+    print()
+    print(metrics.classification_report(y_true, y_pred))
+    print()
+
+    pipeline = get_pipeline(classifier, ncol)
+    pipeline.fit(X, y, groups=groups)
+
+    with open('./results/classifier/pipeline-similarity-%s.sav' % (classifier), 'wb') as f:
+      pickle.dump(pipeline, f)

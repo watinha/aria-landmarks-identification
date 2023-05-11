@@ -3,12 +3,19 @@ from pipeline.clustering_rows import cluster_rows
 from pipeline.cross_validation import fit_classifier
 from pipeline.image_report import generate_reports
 from pipeline.merge_cv_reports import merge_reports
-from pipeline.regions_search import search_regions
+from pipeline.regions_search import search_regions, fit_similarity_classifier
 
 classifiers = ['svm', 'knn', 'dt', 'rf']
 for classifier in classifiers:
     print('fitting %s' % (classifier))
     fit_classifier(classifier)
+    print('results saved in ./results/classifier folder')
+
+print('')
+
+for classifier in classifiers:
+    print('fitting similarity %s' % (classifier))
+    fit_similarity_classifier(classifier)
     print('results saved in ./results/classifier folder')
 
 print('')
@@ -35,4 +42,3 @@ print('')
 print('generating image reports...')
 generate_reports()
 print('image reports saved in ./results/image-reports')
-
