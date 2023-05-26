@@ -13,6 +13,7 @@ def generate_reports ():
 
         xpath = report.endswith('.xpath.csv')
         similar = report.endswith('.similar.csv')
+        clustered = report.endswith('.clustered.csv')
 
         df = pd.read_csv('./results/clusters/%s' % (report))
         nrows, _ = df.shape
@@ -56,6 +57,8 @@ def generate_reports ():
                           mode = 'xpath'
                         if similar:
                           mode = 'similar'
+                        if clustered:
+                          mode = 'clustered'
 
                         img.save('./results/image-reports/%s/%s-%s-%s-%s-report.png' % (url_hash, landmark, url_index, pag, mode))
                         df.loc[:, ['url', 'screenshot', 'xpath']].to_csv('./results/image-reports/%s/%s-%s-%s-%s.csv' % (url_hash, landmark, url_index, pag, mode))
