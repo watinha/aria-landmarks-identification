@@ -1,4 +1,4 @@
-import pandas as pd, math
+import pandas as pd, math, cuml
 
 from sklearn import tree, svm, ensemble, multiclass, neighbors
 from sklearn.pipeline import Pipeline
@@ -32,14 +32,6 @@ def get_pipeline (classifier_name, ncol):
             'classifier__min_samples_split': [2, 3, 5, 7, 10],
             'classifier__class_weight': ['balanced']
         }
-    elif (classifier_name == 'ovr_dt'):
-        classifier = multiclass.OneVsRestClassifier(tree.DecisionTreeClassifier(random_state=seed))
-        params = {
-            'classifier__criterion': ["gini", "entropy"],
-            'classifier__max_depth': [10, 50, 100, None],
-            'classifier__min_samples_split': [2, 5, 10],
-            'classifier__class_weight': ['balanced']
-        }
     elif (classifier_name == 'rf'):
         classifier = ensemble.RandomForestClassifier(random_state=seed)
         params = {
@@ -47,15 +39,6 @@ def get_pipeline (classifier_name, ncol):
             'classifier__criterion': ["gini", "entropy"],
             'classifier__max_depth': [5, 7, 10, 50, None],
             'classifier__min_samples_split': [2, 3, 5, 7, 10],
-            'classifier__class_weight': ['balanced']
-        }
-    elif (classifier_name == 'ovr_rf'):
-        classifier = multiclass.OneVsRestClassifier(ensemble.RandomForestClassifier(random_state=seed))
-        params = {
-            'classifier__n_estimators': [5, 10, 100],
-            'classifier__criterion': ["gini", "entropy"],
-            'classifier__max_depth': [10, 50, 100, None],
-            'classifier__min_samples_split': [2, 10, 100],
             'classifier__class_weight': ['balanced']
         }
     elif (classifier_name == 'knn'):
@@ -74,7 +57,7 @@ def get_pipeline (classifier_name, ncol):
             'classifier__min_samples_split': [2, 10],
             'classifier__learning_rate': [0.01,0.1,1]
         }
-    else:
+    elif (classifier_name == 'lsvm'):
         classifier = svm.LinearSVC(random_state=seed, fit_intercept=False)
         params = {
             #'classifier__penalty': ['l1', 'l2'],
@@ -85,10 +68,38 @@ def get_pipeline (classifier_name, ncol):
             'classifier__dual': [False],
             'classifier__max_iter': [100000]
         }
+    elif (classifier_name == 'cu_svm'):
+        classifier = cuml.svm.SVC(random_state=seed, probability=True)
+        params = {
+            'classifier__kernel': ['linear', 'rbf', 'poly'],
+            'classifier__C': [0.1, 1, 10, 100],
+            'classifier__degree': [2, 3],
+            #'classifier__coef0': [1, 10, 100],
+            #'classifier__tol': [0.001, 0.1, 1],
+            'classifier__class_weight': ['balanced']
+        }
+    elif (classifier_name == 'cu_rf'):
+        classifier = cuml.ensemble.RandomForestClassifier(random_state=seed)
+        params = {
+            'classifier__n_estimators': [5, 10, 30, 100],
+            'classifier__criterion': ["gini", "entropy"],
+            'classifier__max_depth': [5, 7, 10, 50, None],
+            'classifier__min_samples_split': [2, 3, 5, 7, 10]
+        }
+    else: # (cuml.KNN)
+        classifier = cuml.neighbors.KNeighborsClassifier()
+        params = {
+            'classifier__n_neighbors': [5, 10, 20],
+            'classifier__weights': ["uniform", "distance"]
+        }
+
+    scaler = StandardScaler()
+    if classifier_name.startswith('cu_'):
+      scaler = cuml.preprocessing.StandardScaler()
 
     pipeline = Pipeline([
         ('variance', VarianceThreshold()),
-        ('scaler', StandardScaler()),
+        ('scaler', scaler),
         ('selector', SelectKBest(f_classif)),
         ('classifier', classifier),
     ])

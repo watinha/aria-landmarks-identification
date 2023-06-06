@@ -1,6 +1,6 @@
 import logging, sys, numpy as np, pandas as pd, json, pickle
 
-from sklearn import metrics
+from sklearn import metrics, preprocessing
 from sklearn.model_selection import GroupShuffleSplit
 
 from imblearn.under_sampling import TomekLinks, ClusterCentroids, NearMiss
@@ -17,14 +17,16 @@ def fit_classifier (classifier):
     classname_arg = True if classname_arg == 'True' else False
 
     dataset = pd.read_csv('./data/training.classified.csv')
-    features = [ column for column in dataset.columns.tolist() if column not in ['Unnamed: 0', 'url', 'tagName', 'role', 'class', 'parent_landmark', 'screenshot', 'xpath'] ]
+    features = [ column for column in dataset.columns.tolist() if column not in ['Unnamed: 0', 'url', 'tagName', 'role', 'class', 'parent_landmark', 'screenshot', 'xpath', 'label', 'className'] ]
     new_features = None
 
     run_cv = True
     extractor = EnhancingFeatures(features, relative=relative_arg, classnames=classname_arg)
 
-    X = dataset.loc[:, features].to_numpy()
-    y = dataset.loc[:, 'class'].to_numpy()
+    encoder = preprocessing.LabelEncoder()
+
+    X = dataset.loc[:, features].to_numpy(np.float64)
+    y = encoder.fit_transform(dataset.loc[:, 'class'].to_numpy())
     groups = dataset.loc[:, 'url'].to_numpy()
 
     folds = GroupShuffleSplit(n_splits=10, random_state=42)
