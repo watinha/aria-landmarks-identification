@@ -69,7 +69,7 @@ def get_pipeline (classifier_name, ncol):
             'classifier__max_iter': [100000]
         }
     elif (classifier_name == 'cu_svm'):
-        classifier = cuml.svm.SVC(random_state=seed, probability=True)
+        classifier = cuml.svm.SVC(probability=True)
         params = {
             'classifier__kernel': ['linear', 'rbf', 'poly'],
             'classifier__C': [0.1, 1, 10, 100],
