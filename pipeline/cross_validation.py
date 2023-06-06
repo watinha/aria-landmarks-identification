@@ -97,11 +97,12 @@ def fit_classifier (classifier):
     pipeline.fit(X, y, groups=groups)
     pickle.dump(extractor, open('./results/classifier/extractor-%s-%s-%s.sav' % (classifier, relative_arg, classname_arg), 'wb'))
     pickle.dump(pipeline, open('./results/classifier/pipeline-%s-%s-%s.sav' % (classifier, relative_arg, classname_arg), 'wb'))
-    print(metrics.classification_report(y, pipeline.predict(X)))
+    pickle.dump(encoder, open('./results/classifier/encoder.sav'), 'wb')
+    print(metrics.classification_report(encoder.inverse_transform(y), encoder.inverse_transform(pipeline.predict(X))))
 
     if run_cv:
         print('\n\n  ===== Cross-Validation =====')
-        print(metrics.classification_report(y_true, y_pred))
+        print(metrics.classification_report(encoder.inverse_transform(y_true), encoder.inverse_transform(y_pred)))
 
         print(pipeline.best_params_)
         variance_threashold, _, selector, _ = pipeline.best_estimator_.steps
