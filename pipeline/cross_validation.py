@@ -97,7 +97,7 @@ def fit_classifier (classifier):
     pipeline.fit(X, y, groups=groups)
     pickle.dump(extractor, open('./results/classifier/extractor-%s-%s-%s.sav' % (classifier, relative_arg, classname_arg), 'wb'))
     pickle.dump(pipeline, open('./results/classifier/pipeline-%s-%s-%s.sav' % (classifier, relative_arg, classname_arg), 'wb'))
-    pickle.dump(encoder, open('./results/classifier/encoder.sav'), 'wb')
+    pickle.dump(encoder, open('./results/classifier/encoder.sav', 'wb'))
     print(metrics.classification_report(encoder.inverse_transform(y), encoder.inverse_transform(pipeline.predict(X))))
 
     if run_cv:
