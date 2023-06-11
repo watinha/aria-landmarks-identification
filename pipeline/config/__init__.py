@@ -82,7 +82,7 @@ def get_pipeline (classifier_name, ncol):
         classifier = cuml.ensemble.RandomForestClassifier(random_state=seed)
         params = {
             'classifier__n_estimators': [5, 10, 30, 100],
-            'classifier__criterion': ["gini", "entropy"],
+            'classifier__split_criterion': ["gini", "entropy"],
             'classifier__max_depth': [5, 7, 10, 50, None],
             'classifier__min_samples_split': [2, 3, 5, 7, 10]
         }
@@ -90,7 +90,7 @@ def get_pipeline (classifier_name, ncol):
         classifier = cuml.neighbors.KNeighborsClassifier()
         params = {
             'classifier__n_neighbors': [5, 10, 20],
-            'classifier__weights': ["uniform", "distance"]
+            'classifier__weights': ["uniform"]
         }
 
     scaler = StandardScaler()
