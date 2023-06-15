@@ -1,7 +1,7 @@
 import pandas as pd, pickle, os
 
 model = 'rf-True-False.sav'
-THRESHOLD = 0.5
+THRESHOLD = 0.0
 
 def classify_test ():
 
@@ -16,7 +16,7 @@ def classify_test ():
     for path in partial_files:
         classified = {}
         dataset = pd.read_csv('./data/test/%s' % (path))
-        features = [ column for column in dataset.columns.tolist() if column not in ['Unnamed: 0', 'url', 'tagName', 'role', 'class', 'parent_landmark', 'screenshot', 'xpath'] ]
+        features = [ column for column in dataset.columns.tolist() if column not in ['Unnamed: 0', 'url', 'tagName', 'role', 'class', 'parent_landmark', 'screenshot', 'xpath', 'label', 'className'] ]
 
         X_test = dataset.loc[:, features].to_numpy()
         X_test = extractor.transform(X_test)
@@ -24,8 +24,8 @@ def classify_test ():
         y_classes = pipeline.predict(X_test)
         classes = pipeline.best_estimator_.named_steps['classifier'].classes_
 
-        dataset.loc[:, 'class'] = encoder.transform(y_classes)
-        for i, cl in enumerate(encoder.transform(classes)):
+        dataset.loc[:, 'class'] = encoder.inverse_transform(y_classes)
+        for i, cl in enumerate(encoder.inverse_transform(classes)):
             dataset.loc[:, cl] = y_pred[:, i]
 
         for landmark in landmarks:
