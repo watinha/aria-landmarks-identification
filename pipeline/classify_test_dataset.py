@@ -1,7 +1,7 @@
 import pandas as pd, pickle, os
 
 model = 'rf-True-False.sav'
-THRESHOLD = 0.0
+THRESHOLD = 0.5
 
 def classify_test ():
 
