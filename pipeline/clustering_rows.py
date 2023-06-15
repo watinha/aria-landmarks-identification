@@ -5,9 +5,6 @@ CHUNKSIZE = 50000
 landmarks = ['banner', 'complementary', 'contentinfo', 'form',
              'navigation', 'search', 'region', 'main']
 def cluster_rows ():
-    banner = None
-    contentinfo = None
-    complementary = None
 
     for landmark in landmarks:
         nrows = CHUNKSIZE
@@ -29,47 +26,27 @@ def cluster_rows ():
                         left, right, top, bottom = target['left'], target['left'] + target['width'], target['top'], target['top'] + target['height']
                         count = 0
 
-                        includes_banner = True
-                        includes_contentinfo = True
-
-                        if banner is not None and (target['top'] >= (banner['top'] + banner['height'])):
-                            includes_banner = False
-                        if contentinfo is not None and (target['top'] + target['height']) <= contentinfo['top']:
-                            includes_contentinfo = False
-
                         for cluster in clusters:
                             if (top >= cluster['bottom'] or bottom <= cluster['top'] or
                                 left >= cluster['right'] or right <= cluster['left']): # no insersection
                                 count = count + 1
                             else:
-                                cluster['left'] = min(left, cluster['left'])
-                                cluster['right'] = max(right, cluster['right'])
-                                cluster['top'] = min(top, cluster['top'])
-                                cluster['bottom'] = max(bottom, cluster['bottom'])
-
-                                if landmark != 'main':
-                                    if cluster['higher_probability'][landmark] < target[landmark]:
-                                        cluster['higher_probability'] = target
-                                        cluster['includes_banner'] = includes_banner
-                                        cluster['includes_contentinfo'] = includes_contentinfo
-                                else:
-                                    if cluster['higher_probability'][landmark] < target[landmark] and not includes_banner and not includes_contentinfo:
-                                        cluster['higher_probability'] = target
-                                        cluster['includes_banner'] = includes_banner
-                                        cluster['includes_contentinfo'] = includes_contentinfo
+                                if cluster['higher_probability'][landmark] < target[landmark]:
+                                    cluster['higher_probability'] = target
+                                    cluster['left'] = left
+                                    cluster['right'] = right
+                                    cluster['top'] = top
+                                    cluster['bottom'] = bottom
                                 break
 
                         if count == len(clusters):
-                            if landmark != 'main' or (not includes_banner and not includes_contentinfo):
-                                clusters.append({
-                                    'higher_probability': target,
-                                    'left': left,
-                                    'right': right,
-                                    'top': top,
-                                    'bottom': bottom,
-                                    'includes_banner': includes_banner,
-                                    'includes_contentinfo': includes_contentinfo
-                                })
+                            clusters.append({
+                                'higher_probability': target,
+                                'left': left,
+                                'right': right,
+                                'top': top,
+                                'bottom': bottom,
+                            })
 
                         for i in range(len(clusters)): # merge clusters
                            cluster_1 = clusters[i]
@@ -102,10 +79,6 @@ def cluster_rows ():
                     result = pd.DataFrame([])
                     for cluster in clusters:
                         result = pd.concat([result, pd.DataFrame([cluster['higher_probability']])])
-                        if landmark == 'banner':
-                            banner = cluster['higher_probability']
-                        if landmark == 'contentinfo':
-                            contentinfo = cluster['higher_probability']
                     if (result.size > 0):
                         result.to_csv('./results/clusters/%s-%d-%d-results.csv' % (landmark, url_ind, chunk_count))
 
