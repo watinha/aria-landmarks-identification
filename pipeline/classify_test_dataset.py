@@ -9,6 +9,7 @@ def classify_test ():
 
     extractor = pickle.load(open('./results/classifier/extractor-%s' % (model), 'rb'))
     pipeline = pickle.load(open('./results/classifier/pipeline-%s' % (model), 'rb'))
+    encoder = pickle.load(open('./results/classifier/encoder-%s' % (model), 'rb'))
 
     landmarks = ['banner', 'main', 'contentinfo', 'form', 'navigation', 'search', 'region', 'complementary']
 
@@ -23,8 +24,8 @@ def classify_test ():
         y_classes = pipeline.predict(X_test)
         classes = pipeline.best_estimator_.named_steps['classifier'].classes_
 
-        dataset.loc[:, 'class'] = y_classes
-        for i, cl in enumerate(classes):
+        dataset.loc[:, 'class'] = encoder.transform(y_classes)
+        for i, cl in enumerate(encoder.transform(classes)):
             dataset.loc[:, cl] = y_pred[:, i]
 
         for landmark in landmarks:

@@ -1,4 +1,4 @@
-import pandas as pd, math, cuml
+import pandas as pd, math#, cuml
 
 from sklearn import tree, svm, ensemble, multiclass, neighbors
 from sklearn.pipeline import Pipeline
@@ -50,7 +50,7 @@ def get_pipeline (classifier_name, ncol):
             'classifier__p': [1, 2]
         }
     elif (classifier_name == 'gb'):
-        classifier = emsemble.GradientBoostingClassifier()
+        classifier = ensemble.GradientBoostingClassifier()
         params = {
             'classifier__n_estimators': [5, 10, 50],
             'classifier__max_depth': [5, 10, 15, None],
@@ -68,34 +68,34 @@ def get_pipeline (classifier_name, ncol):
             'classifier__dual': [False],
             'classifier__max_iter': [100000]
         }
-    elif (classifier_name == 'cu_svm'):
-        classifier = cuml.svm.SVC(probability=True)
-        params = {
-            'classifier__kernel': ['linear', 'rbf', 'poly'],
-            'classifier__C': [0.1, 1, 10, 100],
-            'classifier__degree': [2, 3],
-            #'classifier__coef0': [1, 10, 100],
-            #'classifier__tol': [0.001, 0.1, 1],
-            'classifier__class_weight': ['balanced']
-        }
-    elif (classifier_name == 'cu_rf'):
-        classifier = cuml.ensemble.RandomForestClassifier(random_state=seed)
-        params = {
-            'classifier__n_estimators': [5, 10, 30, 100],
-            'classifier__split_criterion': ["gini", "entropy"],
-            'classifier__max_depth': [5, 7, 10, 50, None],
-            'classifier__min_samples_split': [2, 3, 5, 7, 10]
-        }
-    else: # (cuml.KNN)
-        classifier = cuml.neighbors.KNeighborsClassifier()
-        params = {
-            'classifier__n_neighbors': [5, 10, 20],
-            'classifier__weights': ["uniform"]
-        }
+    #elif (classifier_name == 'cu_svm'):
+    #    classifier = cuml.svm.SVC(probability=True)
+    #    params = {
+    #        'classifier__kernel': ['linear', 'rbf', 'poly'],
+    #        'classifier__C': [0.1, 1, 10, 100],
+    #        'classifier__degree': [2, 3],
+    #        #'classifier__coef0': [1, 10, 100],
+    #        #'classifier__tol': [0.001, 0.1, 1],
+    #        'classifier__class_weight': ['balanced']
+    #    }
+    #elif (classifier_name == 'cu_rf'):
+    #    classifier = cuml.ensemble.RandomForestClassifier(random_state=seed)
+    #    params = {
+    #        'classifier__n_estimators': [5, 10, 30, 100],
+    #        'classifier__split_criterion': ["gini", "entropy"],
+    #        'classifier__max_depth': [5, 7, 10, 50, None],
+    #        'classifier__min_samples_split': [2, 3, 5, 7, 10]
+    #    }
+    #else: # (cuml.KNN)
+    #    classifier = cuml.neighbors.KNeighborsClassifier()
+    #    params = {
+    #        'classifier__n_neighbors': [5, 10, 20],
+    #        'classifier__weights': ["uniform"]
+    #    }
 
     scaler = StandardScaler()
-    if classifier_name.startswith('cu_'):
-      scaler = cuml.preprocessing.StandardScaler()
+    #if classifier_name.startswith('cu_'):
+    #  scaler = cuml.preprocessing.StandardScaler()
 
     pipeline = Pipeline([
         ('variance', VarianceThreshold()),
