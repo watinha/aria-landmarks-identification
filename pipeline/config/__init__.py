@@ -16,10 +16,10 @@ def get_pipeline (classifier_name, ncol):
     if (classifier_name == 'svm'):
         classifier = svm.SVC(random_state=seed, probability=True)
         params = {
-            'classifier__kernel': ['linear', 'rbf', 'poly'],
-            #'classifier__kernel': ['linear'],
+            #'classifier__kernel': ['linear', 'rbf', 'poly'],
+            'classifier__kernel': ['linear', 'rbf'],
             'classifier__C': [0.1, 1, 10, 100],
-            'classifier__degree': [2, 3],
+            #'classifier__degree': [2, 3],
             #'classifier__coef0': [1, 10, 100],
             #'classifier__tol': [0.001, 0.1, 1],
             'classifier__class_weight': ['balanced']
