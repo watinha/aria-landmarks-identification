@@ -49,19 +49,32 @@ def search_regions ():
     print('%s - xpath - %d -> %d' % (url, df.shape[0], xpath_df.shape[0]))
 
     classified_df = pd.DataFrame()
-    for i, ind in enumerate(target_ind):
-      base = df.iloc[[base_ind[i]]]
-      target = test_df.iloc[[ind]]
-      target.index = base.index
-      base.columns = [('base_%s' % (c)) for c in base.columns]
-      target.columns = [('target_%s' % (c)) for c in target.columns]
-      similarity_df = pd.concat([base, target], axis=1)
+    base_df = df.copy(deep=True)
+    initial_nrows = -1
+    nrows, _ = classified_df.shape
+    included_ind = []
 
-      X = features_from_similarity_df(similarity_df)
-      y = pipeline.predict(X)
+    while initial_nrows < nrows:
+      initial_nrows, _ = classified_df.shape
 
-      if y > THRESHOLD:
-        classified_df = pd.concat([classified_df, test_df.iloc[[ind]]])
+      for i, ind in enumerate(target_ind):
+        base = base_df.iloc[[base_ind[i]]]
+        target = test_df.iloc[[ind]]
+        target.index = base.index
+        base.columns = [('base_%s' % (c)) for c in base.columns]
+        target.columns = [('target_%s' % (c)) for c in target.columns]
+        similarity_df = pd.concat([base, target], axis=1)
+
+        X = features_from_similarity_df(similarity_df)
+        y = pipeline.predict(X)
+
+        if y > THRESHOLD and ind not in included_ind:
+          classified_df = pd.concat([classified_df, test_df.iloc[[ind]]])
+          included_ind.append(ind)
+
+      nrows, _ = classified_df.shape
+      base_df = classified_df
+
 
     classified_df = pd.concat([df, classified_df])
     new_name = filename.replace('.csv', '.xpath.similar.csv')
