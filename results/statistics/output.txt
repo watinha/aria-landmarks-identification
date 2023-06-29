@@ -1,0 +1,24 @@
+
+*******************************
+            tp
+*******************************
+
+Shapiro wilk in region - p-value=0.000001
+Shapiro wilk in region-nothreshold - p-value=0.000109
+Shapiro wilk in regions++ - p-value=0.000028
+Friedman test for repeated samples F=122.346912 and p-value=0.000000
+Posthoc Nemenyi pairwise comparisons test for unreplicated blocked data
+ - region-nothreshold (14.295455) and region (8.022727) with p-value=0.001000
+ - regions++ (13.590909) and region (8.022727) with p-value=0.001000
+
+*******************************
+            fp
+*******************************
+
+Shapiro wilk in region - p-value=0.000000
+Shapiro wilk in region-nothreshold - p-value=0.000005
+Shapiro wilk in regions++ - p-value=0.000003
+Friedman test for repeated samples F=41.174476 and p-value=0.155292
+Posthoc Nemenyi pairwise comparisons test for unreplicated blocked data
+ - region-nothreshold (8.647059) and region (0.088235) with p-value=0.001000
+ - region-nothreshold (8.647059) and regions++ (0.882353) with p-value=0.001000
