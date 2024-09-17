@@ -7,9 +7,9 @@ from pipeline.image_report import generate_reports
 from pipeline.merge_cv_reports import merge_reports
 from pipeline.regions_search import search_regions, generate_similarity_dataset, fit_similarity_classifier, cluster_similars
 
-#classifiers = ['cu_svm','svm', 'cu_rf', 'rf', 'cu_knn', 'knn', 'dt']
+classifiers = ['cu_svm','svm', 'cu_rf', 'rf', 'cu_knn', 'knn', 'dt']
 classifiers = ['svm', 'rf', 'knn', 'dt']
-#classifiers = ['rf']
+classifiers = ['rf']
 for classifier in classifiers:
     print('fitting %s' % (classifier))
     print(time.asctime())
